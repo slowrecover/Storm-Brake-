@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="急刹车">
 <meta name="theme-color" content="#FDF8EC">
-<title>想想 · 暴风雨急刹车 | Thinky · Storm Brake</title>
+<title>夏天 · 暴风雨急刹车 | Summer · Storm Brake</title>
 <link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -55,6 +55,14 @@
   .foot{font-size:12.5px;color:#a89f8c;text-align:center;line-height:1.7;margin-top:20px;max-width:335px}
   .trophy{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:8px 0 12px;max-width:300px}
   .trophy span{font-size:22px;line-height:1}
+  .moodRow{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:4px 0 12px}
+  .moodRow button{width:auto;flex:none;padding:10px 15px;margin:0;font-size:18px;border-radius:14px 7px 12px 8px}
+  .moodRow button.sel{background:var(--moon)}
+  .deltaLine{font-size:14.5px;color:#6f93bb;text-align:center;min-height:22px;margin-bottom:10px;line-height:1.6}
+  .sighWrap{width:100%;height:170px;display:flex;align-items:center;justify-content:center;margin:6px 0 2px}
+  #sighRing{width:112px;height:112px;border-radius:50%;border:3px solid var(--ele2);display:flex;align-items:center;justify-content:center;
+    color:var(--deep);font-size:15px;letter-spacing:2px;transition:transform .9s linear;text-align:center;line-height:1.4}
+  .planRow button.sel{background:var(--moon)}
   @media (prefers-reduced-motion:reduce){.screen{animation:none}}
 </style>
 </head>
@@ -62,11 +70,12 @@
 <div class="app">
   <button class="lang" id="langBtn" onclick="flip()">EN</button>
 
-  <svg id="ele" width="150" height="132" viewBox="0 0 300 260" role="img" aria-label="小象想想 Thinky">
+  <svg id="ele" width="150" height="132" viewBox="0 -14 300 274" role="img" aria-label="小象夏天 Summer the Elephant">
     <defs><filter id="cr" x="-15%" y="-15%" width="130%" height="130%">
       <feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="3" seed="11" result="n"/>
       <feDisplacementMap in="SourceGraphic" in2="n" scale="6"/></filter></defs>
     <g filter="url(#cr)" stroke-linecap="round" stroke-linejoin="round">
+      <text id="eleName" x="150" y="26" text-anchor="middle" font-size="30" fill="#e0894a" transform="rotate(-3 150 26)" style="font-family:'ZCOOL KuaiLe','PingFang SC',sans-serif">夏天</text>
       <path d="M150 52 q 0 -20 12 -26" fill="none" stroke="#5b544f" stroke-width="5"/>
       <path d="M162 26 l 16 -9 -2 17 z M162 26 l -15 10 16 6 z" fill="#F4A7BC" stroke="#5b544f" stroke-width="4"/>
       <ellipse cx="76" cy="112" rx="34" ry="42" fill="#95B3D2" fill-opacity=".85" stroke="#5b544f" stroke-width="6"/>
@@ -93,6 +102,7 @@
     <button class="big" onclick="go('s-feel')" data-i="b_big"></button>
     <div class="trophy" id="trophy"></div>
     <p class="counter" id="count"></p>
+    <p class="counter" id="planLine" style="color:#6f93bb"></p>
     <p class="foot" data-i="foot"></p>
   </div>
 
@@ -112,8 +122,26 @@
     <h1 id="decodeTitle"></h1>
     <p class="say" id="decodeSay"></p>
     <div class="sci" id="decodeSci"></div>
-    <button class="moss" onclick="go('s-wave')" id="decodeBtn"></button>
+    <button class="moss" onclick="go('s-rate1')" id="decodeBtn"></button>
     <button class="ghost" onclick="go('s-feel')" data-i="back"></button>
+  </div>
+
+  <!-- 冲浪前:给冲动打个分(CBT证据生成) -->
+  <div class="screen" id="s-rate1">
+    <h1 data-i="t_rate1"></h1>
+    <p class="say" data-i="say_rate1"></p>
+    <div class="moodRow" id="rate1Row"></div>
+    <button class="moss" id="rate1Btn" onclick="go('s-wave')" disabled style="opacity:.4" data-i="b_rate1"></button>
+    <button class="ghost" onclick="go('s-sigh')" data-i="b_sigh"></button>
+  </div>
+
+  <!-- 生理叹息:太猛时的30秒急救(斯坦福验证的最快呼吸法) -->
+  <div class="screen" id="s-sigh">
+    <h1 data-i="t_sigh"></h1>
+    <p class="bcount" id="sighCount" style="font-size:13px;color:#a89f8c;text-align:center;margin-bottom:6px"></p>
+    <div class="sighWrap"><div id="sighRing"><span id="sighWord"></span></div></div>
+    <p class="say" data-i="say_sigh"></p>
+    <button class="ghost" onclick="skipSigh()" data-i="b_skipsigh"></button>
   </div>
 
   <div class="screen" id="s-wave">
@@ -134,6 +162,9 @@
 
   <div class="screen" id="s-check">
     <h1 data-i="t_check"></h1>
+    <p class="say" id="rate2Say"></p>
+    <div class="moodRow" id="rate2Row"></div>
+    <div class="deltaLine" id="deltaLine"></div>
     <button class="moss" onclick="go('s-act')" data-i="c1"></button>
     <button class="soft" onclick="go('s-wave')" data-i="c2"></button>
     <button class="moon" onclick="go('s-eat')" data-i="c3"></button>
@@ -161,8 +192,15 @@
 
   <div class="screen" id="s-win">
     <h1 data-i="t_win"></h1>
+    <div class="deltaLine" id="deltaStamp"></div>
     <div class="card stamp" data-i="stamp"></div>
     <p class="say" data-i="say_win"></p>
+    <p class="say" data-i="t_plan" style="margin-top:4px"></p>
+    <div class="planRow" style="width:100%">
+      <button class="soft" onclick="pickPlan(0,this)" data-i="p1"></button>
+      <button class="soft" onclick="pickPlan(1,this)" data-i="p2"></button>
+      <button class="soft" onclick="pickPlan(2,this)" data-i="p3"></button>
+    </div>
     <p class="sub" data-i="s_win"></p>
     <button class="soft" onclick="go('s-home')" data-i="b_home"></button>
   </div>
@@ -171,7 +209,7 @@
   var T={
     zh:{
       t_home:'暴风雨急刹车',
-      s_home:'很想很想吃东西的那个瞬间，先来找想想待一会儿。这里不数卡路里，也没有人骂你。',
+      s_home:'很想很想吃东西的那个瞬间，先来找夏天待一会儿。这里不数卡路里，也没有人骂你。',
       b_big:'我现在特别想吃',
       foot:'好好吃饭永远不是错。这个工具只管"情绪掀起的暴风雨"。如果暴食经常发生、让你很痛苦，去找医生或心理咨询师聊聊，是很勇敢的一步。',
       t_feel:'先别动，抱一下自己',
@@ -182,10 +220,10 @@
       t_check:'那道浪，退了一些了吗？',
       c1:'退了，我缓过来一点了',c2:'还在，再陪它一会儿',c3:'还是很想吃',
       t_hungry:'那就去吃呀！',
-      s_hungry:'饿了吃饭是天经地义的事。坐下来，慢慢吃，选你真正想吃的那一样，一丝罪恶感都不要带。想想在这儿等你回来。',
+      s_hungry:'饿了吃饭是天经地义的事。坐下来，慢慢吃，选你真正想吃的那一样，一丝罪恶感都不要带。夏天在这儿等你回来。',
       b_hungry:'好，我去好好吃饭',
       t_eat:'那就好好地、选择去吃',
-      s_eat:'听想想说一句：吃了，也绝对不是失败。只温柔地做三件小事——坐下来吃、慢一点吃、选你真正想吃的那一样。吃完回来打个卡就好，想想不会说你，只会给你一个抱抱。',
+      s_eat:'听夏天说一句：吃了，也绝对不是失败。只温柔地做三件小事——坐下来吃、慢一点吃、选你真正想吃的那一样。吃完回来打个卡就好，夏天不会说你，只会给你一个抱抱。',
       b_eat:'谢谢你，我知道了',
       t_act:'那，给它一个更对的东西',
       b_act:'我试了一个，打卡',
@@ -193,15 +231,33 @@
       say_win:'你刚刚没有被冲动推着走，<br>你选择了先陪自己待一会儿。<br>这件事，比你以为的更了不起。',
       stamp:'你刚刚做的，不只是"忍住"：<br>你先看懂了自己缺什么，<br>再给了它对的东西。<br>大脑会记住这条新路——<br>下一次，它会更容易找到。',
       s_win:'今天这一次，你替自己做了对的选择。',
-      b_home:'回到想想身边',
+      b_home:'回到夏天身边',
       bin:'轻轻吸气…… 1、2、3、4',bout:'慢慢呼气…… 1、2、3、4',
       phRise:'浪在往上涨…… 别怕，这很正常',phPeak:'到最高点了…… 你还稳稳站着',phFall:'看，它开始退了……',
       bIn:'吸 气',bHold:'停',bOut:'呼 —— 气',
+      t_rate1:'先给这股冲动打个分',
+      say_rate1:'凭直觉就好:此刻它有多猛?<br>(1是微风,10是滔天大浪)',
+      b_rate1:'记下了,去看浪',
+      b_sigh:'太猛了,等不及——先做30秒急救呼吸',
+      t_sigh:'生理叹息 · 30秒急救',
+      say_sigh:'吸一口,再补吸一小口,然后长长地叹出去。<br>这是被验证过的、最快让身体冷静的呼吸。',
+      b_skipsigh:'好了,去看浪',
+      sIn:'吸——',sIn2:'再补一小口',sOut:'长长叹出去………',
+      sighN:function(n,total){return '第 '+n+' / '+total+' 次'},
+      say_rate2:function(x){return '先记一下:刚才是 '+x+' 分,现在这股劲儿还有几分?'},
+      say_rate2b:'先记一下:现在这股劲儿还有几分猛?',
+      deltaDown:function(a,b){return '从 '+a+' 到 '+b+' —— 你亲眼看着它退了 ↓'},
+      deltaFlat:'还没怎么退也没关系,有些浪要多陪一会儿。',
+      t_plan:'趁现在头脑清醒,跟自己定个预案——<br>下次冲动来的时候,我会先:',
+      p1:'先来找夏天,看一道浪',p2:'先喝一大杯温水',p3:'先离开厨房,去窗边站一分钟',
+      planPrefix:'和自己的约定:下次冲动来时,我会',
+      planSaved:'约定好了,夏天帮你记着 ✓',
+      urgeStamp:function(a,b){return '冲动强度 '+a+' → '+b},
       decBtn:'好，陪我看这道浪'
     },
     en:{
       t_home:'Storm brake',
-      s_home:'That moment when you really, really want to eat — come sit with Thinky first. No calorie counting. No one scolding you.',
+      s_home:'That moment when you really, really want to eat — come sit with Summer first. No calorie counting. No one scolding you.',
       b_big:'I really want to eat right now',
       foot:'Eating well is never wrong. This tool only handles the storms your feelings stir up. If bingeing happens often and hurts, talking to a doctor or therapist is a brave step.',
       t_feel:'Hold on — give yourself a hug first',
@@ -212,10 +268,10 @@
       t_check:'Has the wave eased off a little?',
       c1:'Yes, I feel a bit calmer',c2:'Still here — stay with it',c3:'I still really want to eat',
       t_hungry:'Then go eat!',
-      s_hungry:'Being hungry means you eat — that is just how bodies work. Sit down, eat slowly, pick what you truly want, with zero guilt. Thinky will wait right here.',
+      s_hungry:'Being hungry means you eat — that is just how bodies work. Sit down, eat slowly, pick what you truly want, with zero guilt. Summer will wait right here.',
       b_hungry:'Okay, off to eat well',
       t_eat:'Then gently choose to eat',
-      s_eat:'One thing from Thinky: eating is absolutely not failure. Just three gentle things — sit down, slow down, pick the one thing you truly want. Come check in after. No lectures — only a hug.',
+      s_eat:'One thing from Summer: eating is absolutely not failure. Just three gentle things — sit down, slow down, pick the one thing you truly want. Come check in after. No lectures — only a hug.',
       b_eat:'Thank you. I got it',
       t_act:'So — give it the right thing instead',
       b_act:'I tried one — check in',
@@ -223,10 +279,28 @@
       say_win:'You were not pushed around by the urge.<br>You chose to sit with yourself first.<br>That is a bigger deal than you think.',
       stamp:'What you just did was more than "resisting":<br>you first understood what you were missing,<br>then gave it the right thing.<br>Your brain remembers this new path —<br>next time, it finds it more easily.',
       s_win:'Today, this once, you made the right choice for yourself.',
-      b_home:'Back to Thinky',
+      b_home:'Back to Summer',
       bin:'Breathe in gently\u2026 1, 2, 3, 4',bout:'Breathe out slowly\u2026 1, 2, 3, 4',
       phRise:'The wave is rising\u2026 do not be afraid, this is normal',phPeak:'At the peak\u2026 you are still standing',phFall:'See — it is starting to fall\u2026',
       bIn:'breathe in',bHold:'hold',bOut:'breathe out',
+      t_rate1:'First, rate this urge',
+      say_rate1:'Just gut feeling: how fierce is it right now?<br>(1 a breeze, 10 a tidal wave)',
+      b_rate1:'Noted — to the wave',
+      b_sigh:'Too fierce to wait — 30s rescue breathing first',
+      t_sigh:'Physiological sigh · 30s rescue',
+      say_sigh:'Inhale, top it up with a second small inhale, then sigh it all out, long.<br>The fastest proven way to calm the body down.',
+      b_skipsigh:'Okay — to the wave',
+      sIn:'inhale—',sIn2:'top-up sip',sOut:'long sigh out………',
+      sighN:function(n,total){return 'sigh '+n+' / '+total},
+      say_rate2:function(x){return 'Quick note: it was '+x+' before — how fierce is it now?'},
+      say_rate2b:'Quick note: how fierce is it now?',
+      deltaDown:function(a,b){return 'From '+a+' to '+b+' — you watched it fall ↓'},
+      deltaFlat:'Not much lower yet? That is okay — some waves need more company.',
+      t_plan:'While your head is clear, make a pact —<br>next time the urge comes, I will first:',
+      p1:'Come watch a wave with Summer',p2:'Drink a big glass of water',p3:'Leave the kitchen, stand by a window',
+      planPrefix:'Pact with yourself: next urge, I will ',
+      planSaved:'Pact saved — Summer remembers ✓',
+      urgeStamp:function(a,b){return 'Urge intensity '+a+' → '+b},
       decBtn:'Okay, watch the wave with me'
     }
   };
@@ -292,10 +366,13 @@
   };
 
   var lang='zh',emo='tired',surfed=0,timer=null,left=180,DUR=180,seaStart=0,seaRAF=null;
+  var urge1=0,urge2=0,plan=-1,sighRAF=null,sighStart=0;
   function applyLang(){
     document.querySelectorAll('[data-i]').forEach(function(el){el.innerHTML=T[lang][el.getAttribute('data-i')]});
     document.getElementById('langBtn').textContent=lang==='zh'?'EN':'中';
+    var nm=document.getElementById('eleName');if(nm)nm.textContent=lang==='zh'?'夏天':'Summer';
     paint();
+    paintPlan();
   }
   function flip(){lang=lang==='zh'?'en':'zh';try{if(window.storage)window.storage.set('lang',lang)}catch(e){}applyLang();if(document.getElementById('s-decode').classList.contains('on'))fillDecode();if(document.getElementById('s-act').classList.contains('on'))fillAct();}
   function fmt(s){return Math.floor(s/60)+":"+("0"+s%60).slice(-2)}
@@ -317,6 +394,9 @@
     document.querySelectorAll('.screen').forEach(function(x){x.classList.remove('on')});
     document.getElementById(id).classList.add('on');
     if(id==='s-wave')startWave();else stopWave();
+    if(id==='s-sigh')startSigh();else stopSigh();
+    if(id==='s-rate1')buildRate1();
+    if(id==='s-check')buildRate2();
     if(id==='s-act')fillAct();
     var eye=document.getElementById('eye');
     if(id==='s-win'||id==='s-hungry'||id==='s-eat'||id==='s-act'){eye.setAttribute('d','M108 114 q 9 -9 18 0 M174 114 q 9 -9 18 0')}
@@ -379,7 +459,60 @@
     left--;
   }
   function endWave(){stopWave();go('s-check')}
-  function win(){surfed++;save();paint();go('s-win')}
+  function buildRow(rowId,btnCb){
+    var row=document.getElementById(rowId);row.innerHTML='';
+    for(var i=1;i<=10;i++){(function(v){var b=document.createElement('button');b.textContent=v;
+      b.onclick=function(){[].forEach.call(row.children,function(c){c.classList.remove('sel')});b.classList.add('sel');btnCb(v);};
+      row.appendChild(b);})(i);}
+  }
+  function buildRate1(){
+    urge1=0;urge2=0;
+    buildRow('rate1Row',function(v){urge1=v;var b=document.getElementById('rate1Btn');b.disabled=false;b.style.opacity=1;});
+    var b=document.getElementById('rate1Btn');b.disabled=true;b.style.opacity=.4;
+  }
+  function buildRate2(){
+    document.getElementById('rate2Say').innerHTML = urge1?T[lang].say_rate2(urge1):T[lang].say_rate2b;
+    document.getElementById('deltaLine').textContent='';
+    buildRow('rate2Row',function(v){
+      urge2=v;
+      var d=document.getElementById('deltaLine');
+      if(urge1&&v<urge1){d.textContent=T[lang].deltaDown(urge1,v);}
+      else{d.textContent=T[lang].deltaFlat;}
+    });
+  }
+  var SIGH_T=[2500,1200,6300], SIGH_N=3;
+  function startSigh(){stopSigh();sighStart=0;sighRAF=requestAnimationFrame(sighLoop);}
+  function stopSigh(){if(sighRAF){cancelAnimationFrame(sighRAF);sighRAF=null}}
+  function sighLoop(ts){
+    if(!sighStart)sighStart=ts;var t=ts-sighStart;
+    var CY=SIGH_T[0]+SIGH_T[1]+SIGH_T[2];
+    var cyc=Math.floor(t/CY);
+    document.getElementById('sighCount').textContent=T[lang].sighN(Math.min(cyc+1,SIGH_N),SIGH_N);
+    if(cyc>=SIGH_N){stopSigh();go('s-wave');return;}
+    var m=t%CY,ring=document.getElementById('sighRing'),word=document.getElementById('sighWord'),sc,w;
+    if(m<SIGH_T[0]){sc=0.75+0.45*(m/SIGH_T[0]);w=T[lang].sIn;}
+    else if(m<SIGH_T[0]+SIGH_T[1]){sc=1.2+0.18*((m-SIGH_T[0])/SIGH_T[1]);w=T[lang].sIn2;}
+    else{var r=(m-SIGH_T[0]-SIGH_T[1])/SIGH_T[2];sc=1.38-0.63*r;w=T[lang].sOut;}
+    ring.style.transform='scale('+sc.toFixed(3)+')';word.textContent=w;
+    sighRAF=requestAnimationFrame(sighLoop);
+  }
+  function skipSigh(){stopSigh();go('s-wave');}
+  function pickPlan(i,btn){
+    plan=i;
+    var pr=btn.parentNode;[].forEach.call(pr.children,function(c){c.classList.remove('sel')});btn.classList.add('sel');
+    try{if(window.storage)window.storage.set('binge-plan',String(i))}catch(e){}
+    paintPlan();
+  }
+  function paintPlan(){
+    var el=document.getElementById('planLine');if(!el)return;
+    el.textContent = plan>=0 ? (T[lang].planPrefix+'\u300c'+T[lang]['p'+(plan+1)]+'\u300d') : '';
+  }
+  function win(){
+    surfed++;save();paint();
+    var d=document.getElementById('deltaStamp');
+    d.textContent=(urge1&&urge2)?T[lang].urgeStamp(urge1,urge2):'';
+    go('s-win');
+  }
   function paint(){
     var c=document.getElementById('count'); if(c)c.textContent=surfed>0?(lang==='zh'?('你已经陪 '+surfed+' 场暴风雨，安全地过了境'):('You have weathered '+surfed+' storms, safely')):'';
     var tr=document.getElementById('trophy'); if(tr){tr.innerHTML=''; for(var i=0;i<Math.min(surfed,24);i++){var s=document.createElement('span');s.textContent='🌊';tr.appendChild(s);}}
@@ -388,6 +521,7 @@
   (function(){applyLang();try{if(window.storage){
     window.storage.get('binge-surfed').then(function(r){if(r&&r.value){surfed=parseInt(r.value)||0;paint()}}).catch(function(){});
     window.storage.get('lang').then(function(r){if(r&&r.value&&T[r.value]){lang=r.value;applyLang()}}).catch(function(){});
+    window.storage.get('binge-plan').then(function(r){if(r&&r.value!==undefined&&r.value!==null){plan=parseInt(r.value);if(isNaN(plan))plan=-1;paintPlan()}}).catch(function(){});
   }}catch(e){}})();
 </script>
 </body>
